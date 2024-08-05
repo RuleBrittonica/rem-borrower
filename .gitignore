@@ -1,0 +1,26 @@
+# Ignore build artifacts
+/target/
+
+# Ignore Cargo.lock file if you are developing a library
+# If you are developing an application, you should keep Cargo.lock
+Cargo.lock
+
+# Ignore temporary files and directories
+*.rs.bk
+*.tmp
+*.swp
+*.swo
+
+# Ignore IDE/editor-specific files
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db
+
+# Ignore Rust-specific artifacts
+*.rlib
+*.d
