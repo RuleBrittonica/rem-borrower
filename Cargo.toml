@@ -1,0 +1,26 @@
+[package]
+name = "rem-borrower"
+version = "0.1.1"
+edition = "2021"
+authors = ["Sewen Thy <me@sewenthy.dev>"]
+license = "MIT"
+description = "Permission repairer for Rusty Extraction Maestro"
+repository = "https://github.com/verse-lab/rustic-cat"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+colored = "2.0.0"
+clap = { version = "4.0.20", features = [ "derive" ] }
+syn = {version="1.0.86", features=["printing", "parsing", "full", "visit-mut", "visit"]}
+proc-macro2 = { version = "1.0", features = ["span-locations"]}
+quote = "1.0"
+rem-utils = { version = "0.1", path = "../rem-utils" }
+rem-constraint = { version = "0.1", path = "../rem-constraint" }
+itertools = "0.10.5"
+regex = "1.6.0"
+env_logger = "0.10.0"
+log = "0.4.17"
+
+[package.metadata.rust-analyzer]
+rustc_private=true
