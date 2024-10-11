@@ -25,8 +25,8 @@ pub struct BorrowerInput {
     pub input_code: String,
     pub unmodified_code: String,
     pub mut_methods_code: String,
-    pub callee_fn_name: String,
-    pub caller_fn_name: String,
+    pub caller_fn_name: String, // the function that calls the callee
+    pub callee_fn_name: String, // the new function that is extracted
 }
 
 struct RefBorrowAssignerHelper<'a> {
@@ -817,6 +817,7 @@ struct CallerFnArg<'a> {
     caller_fn_name: &'a str,
     callee_finder: &'a mut FindCallee<'a>,
     callee_fn_name: &'a str,
+    #[allow(dead_code)]
     decl_mut: &'a Vec<String>,
     ref_inputs: &'a Vec<String>,
     mut_ref_inputs: &'a Vec<String>,
@@ -1090,7 +1091,9 @@ impl VisitMut for PreExtracter<'_> {
 
 pub struct BorrowResult {
     pub success: bool,
+    #[allow(dead_code)]
     pub make_mut: Vec<String>,
+    #[allow(dead_code)]
     pub make_ref: Vec<String>,
     pub output_code: String,
 }
@@ -1099,8 +1102,8 @@ pub fn inner_make_borrows(
     input_code: String,
     unmodified_code: String,
     mut_methods_content: String,
-    callee_fn_name: &str,
     caller_fn_name: &str,
+    callee_fn_name: &str,
 ) -> BorrowResult {
     let mut file = syn::parse_str::<syn::File>(&input_code.as_str())
         .map_err(|e| format!("{:?}", e))
@@ -1242,8 +1245,8 @@ pub fn make_borrows(
         input.input_code,
         input.unmodified_code,
         input.mut_methods_code,
-        &input.callee_fn_name,
         &input.caller_fn_name,
+        &input.callee_fn_name,
     );
 
     if res.success {
