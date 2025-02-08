@@ -1,11 +1,11 @@
 [package]
 name = "rem-borrower"
-version = "0.1.1"
+version = "0.1.3"
 edition = "2021"
-authors = ["Sewen Thy <me@sewenthy.dev>"]
+authors = ["Sewen Thy <me@sewenthy.dev>", "Matthew Britton <mbritton460@gmail.com>"]
 license = "MIT"
 description = "Permission repairer for Rusty Extraction Maestro"
-repository = "https://github.com/verse-lab/rustic-cat"
+repository = "https://github.com/RuleBrittonica/rem-borrower" # Forked from "https://github.com/verse-lab/rustic-cat"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -22,8 +22,8 @@ rem-constraint = { path = "../rem-constraint" }
 # rem-constraint = { git = "https://github.com/RuleBrittonica/rem-constraint.git", branch = "master" }
 itertools = "0.10.5"
 regex = "1.6.0"
-env_logger = "0.10.0"
+env_logger = "0.11.5"
 log = "0.4.17"
 
-[package.metadata.rust-analyzer]
-rustc_private=true
+# [package.metadata.rust-analyzer]
+# rustc_private=true

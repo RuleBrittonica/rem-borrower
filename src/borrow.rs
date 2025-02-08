@@ -15,8 +15,19 @@ use syn::{
     Token, TraitItemMethod, Type, TypeReference,
 };
 
+use crate::error::BorrowerError;
+
 use log::debug;
 use rem_utils::{format_source, FindCallee};
+
+#[derive(Debug, Clone, PartialEq, Hash)]
+pub struct BorrowerInput {
+    pub input_code: String,
+    pub unmodified_code: String,
+    pub mut_methods_code: String,
+    pub caller_fn_name: String, // the function that calls the callee
+    pub callee_fn_name: String, // the new function that is extracted
+}
 
 struct RefBorrowAssignerHelper<'a> {
     make_ref: &'a Vec<String>,
@@ -806,6 +817,7 @@ struct CallerFnArg<'a> {
     caller_fn_name: &'a str,
     callee_finder: &'a mut FindCallee<'a>,
     callee_fn_name: &'a str,
+    #[allow(dead_code)]
     decl_mut: &'a Vec<String>,
     ref_inputs: &'a Vec<String>,
     mut_ref_inputs: &'a Vec<String>,
@@ -1079,31 +1091,28 @@ impl VisitMut for PreExtracter<'_> {
 
 pub struct BorrowResult {
     pub success: bool,
+    #[allow(dead_code)]
     pub make_mut: Vec<String>,
+    #[allow(dead_code)]
     pub make_ref: Vec<String>,
+    pub output_code: String,
 }
 
 pub fn inner_make_borrows(
-    file_name: &str,
-    new_file_name: &str,
-    mut_method_call_expr_file: &str,
-    callee_fn_name: &str,
+    input_code: String,
+    unmodified_code: String,
+    mut_methods_content: String,
     caller_fn_name: &str,
-    pre_extract_file_name: &str,
+    callee_fn_name: &str,
 ) -> BorrowResult {
-    let pre_extract: String = fs::read_to_string(&pre_extract_file_name)
-        .unwrap()
-        .parse()
-        .unwrap();
-
-    let mut pre_extract_file = syn::parse_str::<syn::File>(pre_extract.as_str())
+    let mut file = syn::parse_str::<syn::File>(&input_code.as_str())
         .map_err(|e| format!("{:?}", e))
         .unwrap();
 
-    let mut_methods_content: String = fs::read_to_string(&mut_method_call_expr_file)
-        .unwrap()
-        .parse()
+    let mut pre_extract_file = syn::parse_str::<syn::File>(&unmodified_code.as_str())
+        .map_err(|e| format!("{:?}", e))
         .unwrap();
+
     let mut mut_methods = vec![];
     for call in mut_methods_content.split("\n") {
         match syn::parse_str::<syn::ExprMethodCall>(call).map_err(|e| format!("{:?}", e)) {
@@ -1112,10 +1121,6 @@ pub fn inner_make_borrows(
         }
     }
 
-    let file_content: String = fs::read_to_string(&file_name).unwrap().parse().unwrap();
-    let mut file = syn::parse_str::<syn::File>(file_content.as_str())
-        .map_err(|e| format!("{:?}", e))
-        .unwrap();
     let mut callee_inputs = vec![];
     let mut callee_ref_inputs = vec![];
     let mut callee_mut_ref_inputs = vec![];
@@ -1136,6 +1141,7 @@ pub fn inner_make_borrows(
             success: false,
             make_mut: vec![],
             make_ref: vec![],
+            output_code: input_code, // No changes to make
         };
     }
 
@@ -1159,6 +1165,7 @@ pub fn inner_make_borrows(
             success: false,
             make_mut: vec![],
             make_ref: vec![],
+            output_code: input_code, // No changes to make
         };
     }
 
@@ -1209,7 +1216,7 @@ pub fn inner_make_borrows(
         callee_fn_name,
     };
 
-    let mut caller_assigner = CallerFnArg {
+    let mut caller_assigner: CallerFnArg<'_> = CallerFnArg {
         caller_fn_name,
         callee_finder: &mut callee_finder,
         callee_fn_name,
@@ -1220,30 +1227,31 @@ pub fn inner_make_borrows(
         make_mut: &make_mut,
     };
     caller_assigner.visit_file_mut(&mut file);
-    let file = file.into_token_stream().to_string();
-    fs::write(new_file_name.to_string(), format_source(&file)).unwrap();
+    let file: String = file.into_token_stream().to_string();
     BorrowResult {
         success: true,
         make_mut,
         make_ref,
+        output_code: format_source( &file ),
     }
 }
 
+/// Returns the modified code with the borrows added (if successful) or an error
+/// if unsuccessful.
 pub fn make_borrows(
-    file_name: &str,
-    new_file_name: &str,
-    mut_method_call_expr_file: &str,
-    callee_fn_name: &str,
-    caller_fn_name: &str,
-    pre_extract_file_name: &str,
-) -> bool {
-    inner_make_borrows(
-        file_name,
-        new_file_name,
-        mut_method_call_expr_file,
-        callee_fn_name,
-        caller_fn_name,
-        pre_extract_file_name,
-    )
-    .success
+    input: BorrowerInput
+) -> Result<String, BorrowerError> {
+    let res: BorrowResult = inner_make_borrows(
+        input.input_code,
+        input.unmodified_code,
+        input.mut_methods_code,
+        &input.caller_fn_name,
+        &input.callee_fn_name,
+    );
+
+    if res.success {
+        Ok(res.output_code)
+    } else {
+        Err(BorrowerError::BorrowerFailed)
+    }
 }
