@@ -1,6 +1,6 @@
 [package]
 name = "rem-borrower"
-version = "0.1.3"
+version = "0.1.4"
 edition = "2021"
 authors = ["Sewen Thy <me@sewenthy.dev>", "Matthew Britton <mbritton460@gmail.com>"]
 license = "MIT"
@@ -10,14 +10,16 @@ repository = "https://github.com/RuleBrittonica/rem-borrower" # Forked from "htt
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-colored = "2.0.0"
-clap = { version = "4.0.20", features = [ "derive" ] }
+colored = "3.0.0"
+clap = { version = "4.5.31", features = [ "derive" ] }
 syn = {version="1.0.86", features=["printing", "parsing", "full", "visit-mut", "visit"]}
 proc-macro2 = { version = "1.0", features = ["span-locations"]}
 quote = "1.0"
+rem-utils="0.1.6"
+rem-constraint="0.1.3"
 # Use local version of rem-utils and rem-constraint
-rem-utils = { path = "../rem-utils" }
-rem-constraint = { path = "../rem-constraint" }
+# rem-utils = { path = "../rem-utils" }
+# rem-constraint = { path = "../rem-constraint" }
 # rem-utils = { git = "https://github.com/RuleBrittonica/rem-utils.git", branch = "master" }
 # rem-constraint = { git = "https://github.com/RuleBrittonica/rem-constraint.git", branch = "master" }
 itertools = "0.10.5"
